@@ -43,6 +43,21 @@ class SigningTests(unittest.TestCase):
         self.profile['Entitlements']['get-task-allow'] = True
         self.assertTrue(signing.signing_entitlements(self.profile, 'dev.other.app', True)['get-task-allow'])
 
+    def test_personal_team_keeps_installation_entitlement_without_preparing_debuggers(self):
+        self.profile['LocalProvision'] = True
+        self.profile['Entitlements']['get-task-allow'] = True
+        ent = signing.signing_entitlements(self.profile, 'dev.other.app', False)
+        self.assertIs(ent['get-task-allow'], True)
+        self.profile['LocalProvision'] = False
+        self.assertIs(signing.signing_entitlements(self.profile, 'dev.other.app', False)['get-task-allow'], False)
+        del self.profile['LocalProvision']
+        self.assertIs(signing.signing_entitlements(self.profile, 'dev.other.app', False)['get-task-allow'], False)
+
+    def test_personal_team_does_not_invent_unauthorized_debug_permission(self):
+        self.profile['LocalProvision'] = True
+        with self.assertRaisesRegex(ValueError, 'get-task-allow'):
+            signing.signing_entitlements(self.profile, 'dev.other.app', False)
+
     def test_expired_profile_and_certificate_disable_selection(self):
         for field in ('expires', 'certificateExpires'):
             item = dict(self.item, **{field: '2000-01-01T00:00:00+00:00'})

@@ -246,13 +246,14 @@ def install_debug(root, ipa, signer_id, device, mode, custom, frida=False, debug
     credential = credential_for(root, signer_id, bundle, device, debug)
     prepare_extensions(root, app, original, bundle, signer_id, device, debug, keep_extensions)
     print('==> Signing debug app', flush=True)
-    signing.sign_app(app, credential, bundle, debug)
+    signed_entitlements = signing.sign_app(app, credential, bundle, debug)
     signed_ipa = job / (app.stem + ('-debug-signed.ipa' if debug else '-signed.ipa'))
     signing.run(['/usr/bin/ditto', '-c', '-k', '--keepParent', job / 'Payload', signed_ipa], quiet=True)
     frida_tool = prepare_frida(frida_path) if frida and debug else (frida_path or '')
     session = {'device': device, 'bundle': bundle, 'originalBundle': original, 'ipa': str(signed_ipa),
                'app': str(app), 'executable': info['CFBundleExecutable'], 'signer': signer_id,
-               'frida': frida_tool or '', 'debuggable': debug, 'injection': injection,
+               'frida': frida_tool or '', 'debuggable': debug,
+               'debugEntitlement': bool((signed_entitlements or {}).get('get-task-allow')), 'injection': injection,
                'name': info.get('CFBundleDisplayName', info.get('CFBundleName', app.stem))}
     manifest = job / 'debug-session.json'
     session['session'] = str(manifest)

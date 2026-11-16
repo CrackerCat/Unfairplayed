@@ -170,13 +170,13 @@ def inspect_ipa(path):
     metadata_path = cache / (key + '.json')
     try:
         old = json.loads(metadata_path.read_text())
-        if old.get('schema') == 1 and old.get('stamp') == stamp and (not old['item'].get('icon') or Path(old['item']['icon']).is_file()):
+        if old.get('schema') == 2 and old.get('stamp') == stamp and (not old['item'].get('icon') or Path(old['item']['icon']).is_file()):
             return old['item']
     except (OSError, ValueError, KeyError, TypeError):
         pass
     item = {'id': str(path), 'path': str(path), 'name': path.stem, 'bundle': '', 'version': '',
             'size': stat.st_size, 'modified': stat.st_mtime, 'icon': '', 'kind': 'downloaded',
-            'state': 'unknown', 'error': '', 'partial': '-PARTIAL' in path.stem.upper(), 'signed': 'signed' in path.stem}
+            'state': 'unknown', 'error': '', 'partial': '-PARTIAL' in path.stem.upper()}
     try:
         with zipfile.ZipFile(path) as archive:
             roots = [n for n in archive.namelist() if re.fullmatch(r'Payload/[^/]+\.app/Info\.plist', n)]
@@ -199,7 +199,7 @@ def inspect_ipa(path):
     except Exception as error:
         # One damaged archive must not hide the rest of the library.
         item['error'] = str(error)
-    write_json(metadata_path, {'schema': 1, 'stamp': stamp, 'item': item})
+    write_json(metadata_path, {'schema': 2, 'stamp': stamp, 'item': item})
     return item
 
 

@@ -129,7 +129,7 @@ When installing a development-signed app for the first time, follow the prompt t
 
 ### ④ Sign and install
 
-Select **Reinstall** (重新安装) beside a decrypted IPA, or choose a file on Devices & Signing.
+Select **Sign & Install** (签名并安装) beside a decrypted IPA, or choose a file on Devices & Signing.
 
 1. Reuse the helper's signing identity or select one for the installation copy.
 2. Reuse the helper ID, enter a custom ID, choose a recent ID, or create one.

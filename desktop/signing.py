@@ -303,6 +303,9 @@ def signing_entitlements(profile, bundle, debug):
     allowed = profile['Entitlements']
     if debug and allowed.get('get-task-allow') is not True:
         raise ValueError('此描述文件未授权 get-task-allow，不能启用动态调试')
+    requires_debug_entitlement = profile.get('LocalProvision') is True
+    if requires_debug_entitlement and allowed.get('get-task-allow') is not True:
+        raise ValueError('个人团队描述文件缺少安装所需的 get-task-allow 权限')
     app_id = allowed.get('application-identifier', '')
     # Re-signers preserve a fixed authorized entitlement separately from the
     # app's CFBundleIdentifier. A fixed profile ID alone must not disable a
@@ -317,7 +320,7 @@ def signing_entitlements(profile, bundle, debug):
         raise ValueError('描述文件缺少 application-identifier')
     team = (profile.get('TeamIdentifier') or [''])[0]
     ent = {'application-identifier': app_id, 'com.apple.developer.team-identifier': team,
-           'get-task-allow': bool(debug)}
+           'get-task-allow': bool(debug or requires_debug_entitlement)}
     groups = allowed.get('keychain-access-groups', [])
     if groups:
         ent['keychain-access-groups'] = [groups[0].replace('*', bundle)]
@@ -328,6 +331,8 @@ def sign_app(app, credential, bundle, debug, embedded_payload=False):
     app = Path(app)
     profile = credential['profile']
     ent = signing_entitlements(profile, bundle, debug)
+    if ent['get-task-allow'] and not debug:
+        print('==> Preserving get-task-allow required by Personal Team; debugger preparation stays disabled', flush=True)
     info_path = app / 'Info.plist'
     info = plistlib.loads(info_path.read_bytes())
     info['CFBundleIdentifier'] = bundle
@@ -354,6 +359,6 @@ def sign_app(app, credential, bundle, debug, embedded_payload=False):
         verify_args.append('--deep')
     run(verify_args + [app], quiet=True)
     actual = plistlib.loads(run(['/usr/bin/codesign', '-d', '--entitlements', '-', '--xml', app], quiet=True))
-    if debug and actual.get('get-task-allow') is not True:
-        raise ValueError('重签名结果没有启用 get-task-allow')
+    if actual.get('get-task-allow', False) is not ent['get-task-allow']:
+        raise ValueError('重签名结果的 get-task-allow 与描述文件要求不一致')
     return ent

@@ -73,6 +73,21 @@ class LibraryTests(unittest.TestCase):
         self.ipa(path, version='2.0')
         self.assertEqual(ipa_library.inspect_ipa(path)['version'], '2.0')
 
+    def test_imported_names_do_not_claim_resigning_and_old_cached_labels_are_recomputed(self):
+        for name in ('App-unsigned.ipa', 'App-signed.ipa', 'App.ipa'):
+            path = self.ipa(self.home / name, cryptid=0)
+            before = path.read_bytes()
+            key = hashlib.sha256(str(path.resolve()).encode()).hexdigest()[:24]
+            cache = ipa_library.cache_directory(); cache.mkdir(parents=True, exist_ok=True)
+            st = path.stat()
+            ipa_library.write_json(cache / (key + '.json'), {
+                'schema': 1, 'stamp': [st.st_size, st.st_mtime_ns, st.st_ctime_ns, st.st_ino],
+                'item': {'name': 'stale filename classification', 'signed': True, 'icon': ''}})
+            item = ipa_library.inspect_ipa(path)
+            self.assertEqual((item['name'], item['kind'], item['state']), ('Example', 'decrypted', 'decrypted'))
+            self.assertNotIn('signed', item)
+            self.assertEqual(path.read_bytes(), before)
+
     def test_registered_external_paths_are_private_deduplicated_and_not_copied(self):
         path = self.ipa(Path(self.temp.name) / 'external files/App.ipa')
         before = path.read_bytes()

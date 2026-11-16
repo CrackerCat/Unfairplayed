@@ -28,12 +28,11 @@ struct LocalIPA: Decodable, Identifiable {
     let state: String
     let error: String
     let partial: Bool
-    let signed: Bool
     var reusable: Bool { error.isEmpty && !partial && state == "decrypted" }
     var badge: String {
         if !error.isEmpty { return "读取失败" }
         if partial { return "未完成" }
-        if kind == "decrypted" { return signed ? "已重签" : "已脱壳" }
+        if kind == "decrypted" { return "已脱壳" }
         return state == "encrypted" ? "已下载" : "待校验"
     }
 }
@@ -146,6 +145,7 @@ struct DebugSession: Decodable {
     let ipa: String
     let session: String
     let debuggable: Bool
+    let debugEntitlement: Bool?
     let frida: String
 }
 
@@ -1211,7 +1211,7 @@ struct ContentView: View {
             }
             Spacer(minLength: 8)
             if item.reusable {
-                Button("重新安装") { model.reuseLibraryIPA(item) }.disabled(model.busy || model.refreshing)
+                Button("签名并安装") { model.reuseLibraryIPA(item) }.disabled(model.busy || model.refreshing)
             } else if item.error.isEmpty && !item.partial && item.state == "encrypted" {
                 Button("砸壳并导出") { model.reuseLibraryIPA(item) }.disabled(!model.canDecrypt)
             }
@@ -1415,7 +1415,7 @@ struct ContentView: View {
                             Text(model.fridaWired ? "目标设备已通过 USB 连接。切换调试器前，请先退出当前会话。" : "Frida 需要 USB 数据线连接目标设备；LLDB 可无线使用。")
                                 .font(.caption).foregroundStyle(.secondary)
                         } else {
-                            Text("此应用安装时未启用动态调试。请返回设备与签名，使用支持调试的描述文件重新安装。")
+                            Text(session.debugEntitlement == true ? "本次仅安装，未准备调试工具。个人团队要求的调试权限已保留。" : "本次仅安装，未准备调试工具。可在设备与签名中启用动态调试后重新安装。")
                                 .font(.callout).foregroundStyle(.secondary)
                         }
                     }
