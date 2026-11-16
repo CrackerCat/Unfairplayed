@@ -22,7 +22,7 @@ if [ ! -f "$ROOT/desktop/Assets/Unfairplayed.icns" ] || \
 fi
 # Both executables and Info.plist declare the same deployment target.
 # Prefix maps also remove the builder's home and checkout path from Mach-O strings.
-SWIFT_FLAGS=(-swift-version 5 -target arm64-apple-macos15.0 -O
+SWIFT_FLAGS=(-swift-version 5 -target arm64-apple-macos14.0 -O
   -file-prefix-map "$ROOT=/UnfairplayedSource" -file-prefix-map "$HOME=/User"
   -debug-prefix-map "$ROOT=/UnfairplayedSource" -debug-prefix-map "$HOME=/User")
 xcrun swiftc "${SWIFT_FLAGS[@]}" -parse-as-library -framework SwiftUI -framework AppKit -framework CryptoKit \
@@ -41,8 +41,8 @@ info = {
     'CFBundleName': 'Unfairplayed', 'CFBundleDisplayName': 'Unfairplayed',
     'CFBundleIdentifier': 'dev.unfairplayed.desktop', 'CFBundleExecutable': 'Unfairplayed',
     'CFBundleIconFile': 'Unfairplayed.icns', 'CFBundlePackageType': 'APPL',
-    'CFBundleShortVersionString': '1.0.3', 'CFBundleVersion': '4',
-    'LSMinimumSystemVersion': '15.0', 'LSArchitecturePriority': ['arm64'],
+    'CFBundleShortVersionString': '1.0.4', 'CFBundleVersion': '5',
+    'LSMinimumSystemVersion': '14.0', 'LSArchitecturePriority': ['arm64'],
     'NSHighResolutionCapable': True,
 }
 Path(sys.argv[1], 'Contents/Info.plist').write_bytes(plistlib.dumps(info))

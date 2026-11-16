@@ -71,8 +71,12 @@ func importIdentity(_ data: Data, _ password: String, keychain: SecKeychain? = n
         options[kSecImportExportKeychain as String] = keychain
         options[kSecImportExportAccess as String] = access
     } else {
+#if compiler(>=6.0)
         if #available(macOS 15.0, *) { options[kSecImportToMemoryOnly as String] = true }
-        else { throw SigningError.message("证书导入需要 macOS 15 或更新版本") }
+        else { throw SigningError.message("当前系统需要临时钥匙串来检查证书") }
+#else
+        throw SigningError.message("当前 SDK 需要临时钥匙串来检查证书")
+#endif
     }
     var imported: CFArray?
     try checked(SecPKCS12Import(data as CFData, options as CFDictionary, &imported), "导入 P12（请确认密码及文件格式）")
@@ -83,12 +87,42 @@ func importIdentity(_ data: Data, _ password: String, keychain: SecKeychain? = n
     return value as! SecIdentity
 }
 
+// Older systems cannot import a PKCS#12 identity into memory. Use a private,
+// randomly unlocked temporary keychain and delete it after reading metadata.
+func inspectIdentity(_ data: Data, _ password: String, forceTemporary: Bool = false) throws -> [String: String] {
+#if compiler(>=6.0)
+    if #available(macOS 15.0, *), !forceTemporary {
+        return try metadata(importIdentity(data, password))
+    }
+#endif
+    let fm = FileManager.default
+    let directory = fm.temporaryDirectory.appendingPathComponent("unfairplayed-inspect-" + UUID().uuidString, isDirectory: true)
+    try fm.createDirectory(at: directory, withIntermediateDirectories: false, attributes: [.posixPermissions: 0o700])
+    var temporaryKeychain: SecKeychain?
+    defer {
+        if let temporaryKeychain { SecKeychainDelete(temporaryKeychain) }
+        try? fm.removeItem(at: directory)
+    }
+    let keychainPath = directory.appendingPathComponent("inspect.keychain-db").path
+    let keychainPassword = Data((UUID().uuidString + UUID().uuidString).utf8)
+    try keychainPassword.withUnsafeBytes { bytes in
+        try checked(SecKeychainCreate(keychainPath, UInt32(keychainPassword.count), bytes.baseAddress, false, nil, &temporaryKeychain), "创建临时钥匙串")
+    }
+    guard let temporaryKeychain else { throw SigningError.message("无法创建临时钥匙串") }
+    return try metadata(importIdentity(data, password, keychain: temporaryKeychain))
+}
+
 func run() throws -> [String: String] {
     let requestData = FileHandle.standardInput.readDataToEndOfFile()
     guard let request = try JSONSerialization.jsonObject(with: requestData) as? [String: String],
           let action = request["action"] else { throw SigningError.message("无效的签名请求") }
+#if UNFAIRPLAYED_TEST_LEGACY_IMPORT
+    let forceTemporary = ProcessInfo.processInfo.environment["UNFAIRPLAYED_TEST_LEGACY_IMPORT"] == "1"
+#else
+    let forceTemporary = false
+#endif
     if action == "inspect" {
-        return try metadata(importIdentity(Data(contentsOf: URL(fileURLWithPath: request["p12"] ?? "")), request["password"] ?? ""))
+        return try inspectIdentity(Data(contentsOf: URL(fileURLWithPath: request["p12"] ?? "")), request["password"] ?? "", forceTemporary: forceTemporary)
     }
     guard let id = request["id"], let path = request["keychain"] else { throw SigningError.message("缺少签名钥匙串参数") }
     if action == "delete" {
@@ -109,7 +143,7 @@ func run() throws -> [String: String] {
     }
     // Validate in memory before creating persistent state.
     let p12 = try Data(contentsOf: URL(fileURLWithPath: request["p12"] ?? ""))
-    _ = try importIdentity(p12, request["password"] ?? "")
+    _ = try inspectIdentity(p12, request["password"] ?? "", forceTemporary: forceTemporary)
     let password = Data((UUID().uuidString + UUID().uuidString).utf8)
     var keychain: SecKeychain?
     try password.withUnsafeBytes { bytes in

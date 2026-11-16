@@ -159,7 +159,7 @@ def package(root, app, output):
     (output / 'privacy-audit.json').write_text(json.dumps({
         'result': 'passed', 'scope': ['app bundle', 'allowlisted source snapshot'],
         'gitHistoryIncluded': False, 'localIdentifiersIncluded': False,
-        'minimumMacOS': '15.0', 'architecture': 'arm64',
+        'minimumMacOS': '14.0', 'architecture': 'arm64',
         'artifacts': {p.name: digest(p.read_bytes()) for p in (app_zip, source_zip)}}, indent=2) + '\n')
     print('Release artifacts: ' + str(output))
 

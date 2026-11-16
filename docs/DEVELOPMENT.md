@@ -58,7 +58,7 @@ bash -n fpdecrypt.sh embed_ipa.sh export_ipa.sh verify_ipa.sh build_desktop.sh d
 ./build_desktop.sh
 ```
 
-93 项回归检查通过，覆盖固定输出目录（含用户路径中的空格）、配置权限和校验、团队读取、真机过滤、任务互斥、取消进程组、下载失败、证书重试、完整导出标记、卸载目标匹配与失败保留输出，以及 arm64 / arm64e / FAT、小型 Mach-O 和空包检查。
+94 项回归检查通过，覆盖固定输出目录（含用户路径中的空格）、配置权限和校验、团队读取、真机过滤、任务互斥、取消进程组、下载失败、证书重试、完整导出标记、卸载目标匹配与失败保留输出，以及 arm64 / arm64e / FAT、小型 Mach-O 和空包检查。
 
 签名回归另覆盖设备与有效期、分发描述文件禁止提升调试权限、固定 App ID 与 Bundle ID 分离、稳定 ID 和历史去重、归档穿越与链接链逃逸、base 默认选择及辅助 App 嵌入内容不被重签。
 
@@ -142,7 +142,7 @@ LLDB 默认 Attach，根据安装路径及主可执行文件精确查找当前 P
 
 App 使用 `WorkspaceBootstrap.swift` 在 `~/Library/Application Support/Unfairplayed/Workspace/` 准备随包运行模板。模板清单经过 SHA-256 校验，持有任务锁后更新允许的运行文件，不覆盖配置、payload 或构建目录。`release_tools.py` 仅拷贝文件白名单，生成不含 Git 元数据的公开源码快照，并扫描两个产物中的构建者主目录、本机签名配置、Git 身份和私有远端域名。
 
-两个 Mac 可执行文件固定为 arm64/macOS 15.0，Info.plist 同步声明 15.0，编译使用文件与调试路径映射。公开产物为 Unfairplayed.app、源码 ZIP、SHA-256 与隐私报告；发布包不记录构建者的仓库路径。
+两个 Mac 可执行文件固定为 arm64/macOS 14.0，Info.plist 同步声明 14.0，编译使用文件与调试路径映射。公开产物为 Unfairplayed.app、源码 ZIP、SHA-256 与隐私报告；发布包不记录构建者的仓库路径。
 
 名称和数据路径的迁移只在开发者本机执行一次，迁移脚本不进入产品。新版本没有旧名称、旧配置键或旧目录的回退逻辑。第三方上游项目的真实名称和署名继续保留。
 
@@ -157,3 +157,7 @@ App 使用 `WorkspaceBootstrap.swift` 在 `~/Library/Application Support/Unfairp
 ## 个人团队普通安装签名
 
 LocalProvision 描述文件签名时保留其要求的 get-task-allow 权限，普通安装选项仅控制调试工具准备和入口。签名后核对实际权限，安装会话分别记录工具准备状态与实际调试权限。非 LocalProvision 签名沿用所选调试设置，分发描述文件不增加未授权权限。
+
+## macOS 14 证书导入
+
+macOS 14 检查 P12 时创建独立的临时文件钥匙串，检查完成或发生错误后删除；持久导入仍使用单独的签名钥匙串。支持内存导入的系统继续使用内存方式。回归检查使用临时生成的证书验证两条路径及失败时的清理。

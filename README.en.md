@@ -8,7 +8,7 @@
   <a href="README.md">简体中文</a> · <strong>English</strong>
 </p>
 <p align="center">
-  <img src="https://img.shields.io/badge/macOS-15%2B-111827?logo=apple&amp;logoColor=white" alt="macOS 15+">
+  <img src="https://img.shields.io/badge/macOS-14%2B-111827?logo=apple&amp;logoColor=white" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Apple_Silicon-arm64-2563EB" alt="Apple Silicon arm64">
   <img src="https://img.shields.io/badge/UI-SwiftUI-F05138?logo=swift&amp;logoColor=white" alt="SwiftUI">
 </p>
@@ -53,7 +53,7 @@ flowchart LR
 
 | Component | Requirement |
 | --- | --- |
-| Mac | Apple Silicon, macOS **15.0+** |
+| Mac | Apple Silicon, macOS **14.0+** |
 | Xcode | Full Xcode installation with the iOS SDK and first-launch components installed |
 | Python | Python 3; the backend uses the standard library |
 | iPhone / iPad | Paired with and trusting your Mac, Developer Mode enabled, kept unlocked during tasks |
@@ -61,9 +61,9 @@ flowchart LR
 | App Store downloads | ipatool and an Apple ID that owns the target app; use the corresponding account on the device |
 | Dynamic debugging | A development profile with `get-task-allow`; USB for Frida |
 
-For decryption, sign in on the device with the Apple ID that owns the target app. The current device validation environment is **iOS 27.0.1**.
+For decryption, sign in on the device with the Apple ID that owns the target app. The current build host runs macOS 27 and the device validation environment is **iOS 27.0.1**; runtime validation on macOS 14 is pending.
 
-In Xcode → Settings → Locations, set **Command Line Tools** to your full Xcode installation.
+In Xcode → Settings → Locations, set **Command Line Tools** to your full Xcode installation. Choose an Xcode version compatible with your macOS and device; for example, Xcode 16.2 requires macOS 14.5+, while Xcode 27 requires macOS 26.6+. See [Apple’s system requirements](https://developer.apple.com/xcode/system-requirements/).
 
 ### 2. Install the desktop app
 

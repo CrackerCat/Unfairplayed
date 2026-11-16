@@ -8,7 +8,7 @@
   <strong>简体中文</strong> · <a href="README.en.md">English</a>
 </p>
 <p align="center">
-  <img src="https://img.shields.io/badge/macOS-15%2B-111827?logo=apple&amp;logoColor=white" alt="macOS 15+">
+  <img src="https://img.shields.io/badge/macOS-14%2B-111827?logo=apple&amp;logoColor=white" alt="macOS 14+">
   <img src="https://img.shields.io/badge/Apple_Silicon-arm64-2563EB" alt="Apple Silicon arm64">
   <img src="https://img.shields.io/badge/UI-SwiftUI-F05138?logo=swift&amp;logoColor=white" alt="SwiftUI">
 </p>
@@ -53,7 +53,7 @@ flowchart LR
 
 | 项目 | 要求 |
 | --- | --- |
-| Mac | Apple Silicon，macOS **15.0+** |
+| Mac | Apple Silicon，macOS **14.0+** |
 | Xcode | 完整 Xcode 与 iOS SDK，已完成首次启动的组件安装 |
 | Python | Python 3，后端使用标准库 |
 | iPhone / iPad | 已配对并信任 Mac、启用开发者模式，操作时保持解锁 |
@@ -61,9 +61,9 @@ flowchart LR
 | App Store 下载 | ipatool，以及拥有目标应用许可的 Apple ID；手机登录对应账号 |
 | 动态调试 | 含 `get-task-allow` 权限的开发描述文件；Frida 使用 USB 连接 |
 
-砸壳时，设备需登录拥有目标应用许可的 Apple ID。当前真机验证环境为 **iOS 27.0.1**。
+砸壳时，设备需登录拥有目标应用许可的 Apple ID。当前构建机为 macOS 27，真机验证环境为 **iOS 27.0.1**；macOS 14 的实际运行尚待验证。
 
-在 Xcode → Settings → Locations 中，将 **Command Line Tools** 设为已安装的完整 Xcode。
+在 Xcode → Settings → Locations 中，将 **Command Line Tools** 设为已安装的完整 Xcode。Xcode 版本需要与 macOS 和目标设备兼容；例如 Xcode 16.2 需要 macOS 14.5+，Xcode 27 需要 macOS 26.6+。参见 [Apple 的系统要求](https://developer.apple.com/xcode/system-requirements/)。
 
 ### 2. 安装桌面应用
 

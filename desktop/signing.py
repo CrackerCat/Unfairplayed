@@ -35,7 +35,7 @@ def helper_path(root):
     source = root / 'desktop/SigningHelper.swift'
     if not path.exists() or source.stat().st_mtime > path.stat().st_mtime:
         path.parent.mkdir(parents=True, exist_ok=True)
-        run(['xcrun', 'swiftc', '-swift-version', '5', '-target', 'arm64-apple-macos15.0', '-O',
+        run(['xcrun', 'swiftc', '-swift-version', '5', '-target', 'arm64-apple-macos14.0', '-O',
              '-file-prefix-map', str(root) + '=/UnfairplayedSource', '-file-prefix-map', str(Path.home()) + '=/User', '-framework', 'Security',
              '-framework', 'CryptoKit', source, '-o', path], quiet=True)
     return path

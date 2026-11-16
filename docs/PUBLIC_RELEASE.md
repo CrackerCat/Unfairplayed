@@ -10,7 +10,7 @@
 
 `desktop/dist/` 中生成：
 
-- `Unfairplayed-macOS-arm64.zip`：包含 `Unfairplayed.app`，面向 Apple Silicon、macOS 15.0+。
+- `Unfairplayed-macOS-arm64.zip`：包含 `Unfairplayed.app`，面向 Apple Silicon、macOS 14.0+。
 - `Unfairplayed-Source.zip`：可重新构建的源码快照，不含 `.git` 和开发者历史。
 - `SHA256SUMS.txt`：上述文件的 SHA-256。
 - `privacy-audit.json`：本次产物隐私检查结果，不包含匹配规则中的私人值。
@@ -29,7 +29,7 @@ App 内置 `Contents/Resources/WorkspaceTemplate/`，包含辅助 App 工程、P
 
 配置和生成文件只保存在用户目录。更新模板不会覆盖 `.unfairplayed.env`、IPA payload 或 Xcode 构建目录。安装包不包含源码仓库绝对路径，可直接移动至其他用户的「应用程序」目录；不需要保留下载或解压后的源码目录。
 
-产物最低版本由两个可执行文件的 `-target arm64-apple-macos15.0` 和 App 的 `LSMinimumSystemVersion=15.0` 共同声明。Swift 编译启用文件/调试路径映射，移除构建者的主目录和仓库路径。
+产物最低版本由两个可执行文件的 `-target arm64-apple-macos14.0` 和 App 的 `LSMinimumSystemVersion=14.0` 共同声明。Swift 编译启用文件/调试路径映射，移除构建者的主目录和仓库路径。
 
 完整 Xcode、iOS SDK、Python 3 及用户自己的签名仍需在使用者的 Mac 上准备。ipatool 和 Frida 按功能需要安装。安装包不包含 Xcode、Apple 账号、认证组件或任何签名私钥。
 
@@ -46,6 +46,6 @@ shasum -a 256 -c SHA256SUMS.txt
 
 ## 本次发布检查
 
-93 项本地回归检查通过。发布 ZIP 在独立临时目录解压后，App 资源签名和两个 Mac 可执行文件的最低版本均通过检查。使用禁止读取原开发仓库的系统 sandbox，完成了空白用户工作目录初始化、内置 iOS 工程无签名构建，以及公开源码包重新构建桌面 App。
+94 项本地回归检查通过。发布 ZIP 在独立临时目录解压后，App 资源签名和两个 Mac 可执行文件的最低版本均通过检查。使用禁止读取原开发仓库的系统 sandbox，完成了空白用户工作目录初始化、内置 iOS 工程无签名构建，以及公开源码包重新构建桌面 App。构建与测试环境为 macOS 27；macOS 14 运行环境和对应 Xcode / iOS 真机组合尚待实测。
 
 本机已有数据已进行一次性迁移；发布版不含旧名称或旧目录迁移代码。原开发仓库中的私人 Git 作者元数据没有改写，公开源码包完全不包含它。
